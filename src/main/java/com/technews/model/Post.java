@@ -5,12 +5,14 @@ import com.sun.istack.NotNull;
 
 
 import javax.persistence.*;
+import java.io.Serializable;
+import java.util.Date;
 import java.util.Objects;
 
 @Entity
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Table(name = "post")
-public class Post {
+public class Post implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer id;
@@ -36,6 +38,9 @@ public class Post {
     @Temporal(TemporalType.DATE)
     @Column(name = "posted_at")
     private Date updatedAt = new Date();
+
+    // Need to use FetchType.LAZY to resolve multiple bags exception
+    @OneToMany(mappedBy = "postId", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Comment> comments;
 
     public Post() {
@@ -127,11 +132,33 @@ public class Post {
         if (!(o instanceof Post)) return false;
         Post post = (Post) o;
         return getVoteCount() == post.getVoteCount() &&
-                Objects.equals(getId(), post.getId()) && Objects.equals(getTitle(), post.getTitle()) && Objects.equals(getPostUrl(), post.getPostUrl()) && Objects.equals(getUserName(), post.getUserName()) && Objects.equals(getUserId(), post.getUserId()) && Objects.equals(getPostedAt(), post.getPostedAt()) && Objects.equals(getUpdatedAt(), post.getUpdatedAt()) && Objects.equals(getComments(), post.getComments());
+                Objects.equals(getId(), post.getId()) &&
+                Objects.equals(getTitle(), post.getTitle()) &&
+                Objects.equals(getPostUrl(), post.getPostUrl()) &&
+                Objects.equals(getUserName(), post.getUserName()) &&
+                Objects.equals(getUserId(), post.getUserId()) &&
+                Objects.equals(getPostedAt(), post.getPostedAt()) &&
+                Objects.equals(getUpdatedAt(), post.getUpdatedAt()) &&
+                Objects.equals(getComments(), post.getComments());
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(getId(), getTitle(), getPostUrl(), getUserName(), getVoteCount(), getUserId(), getPostedAt(), getUpdatedAt(), getComments());
+    }
+
+    @Override
+    public String toString() {
+        return "Post{" +
+                "id=" + id +
+                ", title='" + title + '\'' +
+                ", postUrl='" + postUrl + '\'' +
+                ", userName='" + userName + '\'' +
+                ", voteCount=" + voteCount +
+                ", userId=" + userId +
+                ", postedAt=" + postedAt +
+                ", updatedAt=" + updatedAt +
+                ", comments=" + comments +
+                '}';
     }
 }
